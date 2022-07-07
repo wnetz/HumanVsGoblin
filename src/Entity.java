@@ -1,21 +1,15 @@
 import java.awt.*;
 
-public class Entity {
+abstract class Entity {
     protected int health;
-    protected int movement;
     protected int x, y;
     protected ID type;
-    public Entity(int h, int m, int x, int y)
+    public Entity(int h, int x, int y)
     {
         health = h;
-        movement = m;
         this.x = x;
         this.y = y;
         type = ID.entity;
-    }
-    public void tick()
-    {
-
     }
     public void render(Graphics g, double squareSize)
     {
@@ -30,10 +24,6 @@ public class Entity {
     public int getHealth()
     {
         return health;
-    }
-    public int getMovement()
-    {
-        return movement;
     }
     public ID getType()
     {

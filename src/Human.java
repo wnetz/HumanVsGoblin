@@ -4,12 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Human extends Entity implements activeEntity
+public class Human extends ActiveEntity
 {
     private BufferedImage p;
+    private final  int MOVEMENT = 2;
     public Human(int x,int y)
     {
-        super(5, 2,x,y);
+        super(5, 2,x,y,1);
         type = ID.human;
         try
         {
@@ -20,12 +21,9 @@ public class Human extends Entity implements activeEntity
 
         }
     }
-    public void turn(ID id)
-    {
-
-    }
     public void move(ID id)
     {
+        movement--;
         switch (id)
         {
             case west:
@@ -70,8 +68,20 @@ public class Human extends Entity implements activeEntity
                 break;
         }
     }
-    public int attack() {
+    public int attack(ID id)
+    {
+        attacks --;
         return 0;
+    }
+
+    @Override
+    void tick(int key) {
+
+    }
+    @Override
+    void endTurn()
+    {
+        movement = MOVEMENT;
     }
     public void render(Graphics g, double squareSize)
     {

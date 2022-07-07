@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
 
@@ -11,22 +12,29 @@ public class Game extends Canvas implements Runnable {
     private boolean running = false;
     private Handler handler;
     private static ID gameState;
+    private listener keyBoard;
 
     public Game()
     {
-        handler = new Handler();
         gameState = ID.human;
+        handler = new Handler(keyBoard);
+        Random rand = new Random();
+        keyBoard = new listener(gameState,handler);
 
         System.setProperty("sun.awt.noerasebackground", "true");
         for(int i = 0; i < x;i++)
         {
             for(int j = 0; j < y;j++)
             {
-                handler.addObject(new Land(i,j));
+                handler.addLand(new Land(i,j));
             }
         }
         Human human = new Human(12,24);
         handler.addObject(human);
+        for(int i = 0; i<10; i++)
+        {
+            handler.addObject(new Goblin(rand.nextInt(x),rand.nextInt(y)));
+        }
         //new MainPage(WIDTH, HEIGHT, "human vs goblin", this);
         JFrame frame = new JFrame("human vs goblin");
         frame.setSize(new Dimension(WIDTH, HEIGHT));
@@ -35,18 +43,18 @@ public class Game extends Canvas implements Runnable {
         frame.setLocationRelativeTo(null);
         frame.add(this);
         frame.setVisible(true);
-        addKeyListener(new listener(human,gameState));
+        addKeyListener(keyBoard);
         start();
     }
 
-    public void start()
+    public synchronized void start()
     {
         System.out.println("start");
         mainThread = new Thread(this);
         mainThread.start();
         running = true;
     }
-    public void stop()
+    public synchronized void stop()
     {
         try
         {
@@ -97,7 +105,19 @@ public class Game extends Canvas implements Runnable {
     }
     private void tick()
     {
-        handler.tick(gameState);
+        if(handler.tick(gameState) == 1)
+        {
+            if(gameState == ID.human)
+            {
+                gameState = ID.goblin;
+            }
+            else
+            {
+                gameState = ID.human;
+            }
+            keyBoard.setGameState(gameState);
+        }
+        //System.out.println(gameState);
     }
     private void render()
     {
@@ -113,7 +133,7 @@ public class Game extends Canvas implements Runnable {
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         g.setColor(Color.RED);
         handler.render(g,(this.getWidth()/(double)(x)));
-        System.out.println((this.getWidth()/(double)(x)) + " " + (this.getHeight()/(double)(y)));
+        //System.out.println((this.getWidth()/(double)(x)) + " " + (this.getHeight()/(double)(y)));
         g.setColor(Color.black);
         for(int i = 0; i<=x;i++)
         {

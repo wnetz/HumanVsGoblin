@@ -1,35 +1,62 @@
+import java.awt.*;
 import java.util.ArrayList;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.util.Random;
+
 /**handles updating and drawing of all objects*/
 public class Handler
 {
-    public ArrayList<Entity> entities = new ArrayList<Entity>();
-    /**updates all objects */
-    public void tick(ID gameState)
+    public listener keyBoard;
+    public ArrayList<ActiveEntity> activeEntities = new ArrayList<ActiveEntity>();
+    public ArrayList<Entity> land = new ArrayList<Entity>();
+    public Random rand;
+    public Handler(listener kb)
     {
-        for(int i = 0; i < entities.size(); i++)//update all objects befor looking for collision
+        keyBoard = kb;
+        rand = new Random();
+    }
+    public int tick(ID gameState)
+    {
+        int rtn = 0;
+        for(int i = 0; i < activeEntities.size(); i++)//update all objects befor looking for collision
         {
-            if(entities.get(i).getType() == gameState)
+            if(activeEntities.get(i).getType() == gameState && gameState == ID.human)
             {
-                entities.get(i).tick();
+                if(activeEntities.get(i).getMovement() <= 0)
+                {
+                    activeEntities.get(i).endTurn();
+                    rtn = 1;
+                }
+            }
+            else if(activeEntities.get(i).getType() == gameState && gameState == ID.goblin)
+            {
+                activeEntities.get(i).tick(rand.nextInt(4)+37);
+                rtn = 1;
             }
         }
+        return rtn;
     }
     public void render(Graphics g, double squareSize)
     {
-        for(int i = 0; i < entities.size(); i++)
+        for(int i = 0; i < land.size(); i++)
         {
-            entities.get(i).render(g, squareSize);
+            land.get(i).render(g, squareSize);
+        }
+        for(int i = 0; i < activeEntities.size(); i++)
+        {
+            activeEntities.get(i).render(g, squareSize);
         }
     }
-    public void addObject(Entity e)
+    public void addObject(ActiveEntity e)
     {
-        entities.add(e);
+        activeEntities.add(e);
+    }
+    public void addLand(Entity e)
+    {
+        land.add(e);
     }
     public void removeObject(Entity e)
     {
-        entities.remove(e);
+        activeEntities.remove(e);
     }
 }

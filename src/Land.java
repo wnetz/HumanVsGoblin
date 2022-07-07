@@ -5,7 +5,7 @@ public class Land extends Entity{
 
     public Land(int x, int y)
     {
-        super(-1,-1,x,y);
+        super(-1,x,y);
         this.x=x;
         this.y=y;
         displayChar = "\u25AF";
