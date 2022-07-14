@@ -6,13 +6,17 @@ import java.io.IOException;
 
 public class Human extends ActiveEntity
 {
-    private BufferedImage p;
-    private final  int MOVEMENT = 2;
+
+    private final int MOVEMENT = 5;
+    private boolean attacked;
+    private BufferedImage p;//used for sprite
     public Human(int x,int y)
     {
-        super(5, 2,x,y,1);
+        super(5, 5,x,y);
+        damage = 5;
         type = ID.human;
-        try
+        attacked = false;
+        try//read sprite
         {
             p = ImageIO.read(new File("./src/sprites/player.png"));
         }
@@ -21,71 +25,34 @@ public class Human extends ActiveEntity
 
         }
     }
-    public void move(ID id)
+    @Override
+    public void tick() {
+
+    }
+    @Override
+    public void render(Graphics g, double ss)
     {
-        movement--;
-        switch (id)
+        squareSize = ss;
+        availableMoves.forEach(l->l.render(g,ss));//draw all spaces human can move
+        g.drawImage(p, (int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize, null);
+    }
+    public void stab(Entity e)
+    {
+        e.removeHealth(damage);
+        attacked = true;
+    }
+    @Override
+    public boolean endTurn()
+    {
+        boolean end = false;
+        if(availableMoves.size() <= 1)
         {
-            case west:
-                if(x == 0)
-                {
-                    x = 24;
-                }
-                else
-                {
-                    x--;
-                }
-                break;
-            case north:
-                if(y == 0)
-                {
-                    y = 24;
-                }
-                else
-                {
-                    y--;
-                }
-                break;
-            case south:
-                if(y == 24)
-                {
-                    y=0;
-                }
-                else
-                {
-                    y++;
-                }
-                break;
-            case east:
-                if(x == 24)
-                {
-                    x = 0;
-                }
-                else
-                {
-                    x++;
-                }
-                break;
+            movement = MOVEMENT;
+            attacked = false;
+            end=true;
         }
-    }
-    public int attack(ID id)
-    {
-        attacks --;
-        return 0;
+        return end;
     }
 
-    @Override
-    void tick(int key) {
 
-    }
-    @Override
-    void endTurn()
-    {
-        movement = MOVEMENT;
-    }
-    public void render(Graphics g, double squareSize)
-    {
-        g.drawImage(p,(int)(x*squareSize),(int)(y*squareSize),(int)squareSize,(int)squareSize,null);
-        //g.fillRect((int)(x*squareSize),(int)(y*squareSize),(int)squareSize,(int)squareSize);
-    }
 }

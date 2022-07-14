@@ -1,19 +1,55 @@
 import java.awt.*;
 
-public class Land extends Entity{
-    private String displayChar;
+public class Land extends Entity
+{
+    private final Color base = Color.green;
+    private Color color;
+    private Entity occupiedBy;
 
-    public Land(int x, int y)
+    public Land(int x, int y, int movement)
     {
-        super(-1,x,y);
+        super(-1,movement,x,y);
         this.x=x;
         this.y=y;
-        displayChar = "\u25AF";
+        color = base;
+        occupiedBy = null;
     }
     @Override
-    public void render(Graphics g, double squareSize)
+    public void tick() {
+        color = new Color(0,225/movement,0);
+        if(occupied() && occupiedBy.getHealth()<=0)
+        {
+            occupiedBy=null;
+        }
+    }
+    @Override
+    public void render(Graphics g, double ss)
     {
-        g.setColor(Color.green);
-        g.fillRect((int)(x*squareSize),(int)(y*squareSize),(int)squareSize,(int)squareSize);
+        squareSize = ss;
+        g.setColor(color);
+        g.fillRect((int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize);
+        g.setColor(Color.BLACK);
+        g.drawString("(" + x + "," + y + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
+        if(occupied())//render children if they exist
+        {
+            occupiedBy.render(g,ss);
+        }
+    }
+    public boolean occupied()//determine if tile has a child
+    {
+        return occupiedBy != null;
+    }
+    public Entity getOccupiedBy() {
+        return occupiedBy;
+    }
+    public void setColor(Color c) {
+        color = c;
+    }
+    public void setOccupiedBy(Entity occupiedBy) {
+        this.occupiedBy = occupiedBy;
+    }
+    @Override
+    public String toString() {
+        return "(" + x + "," + y + ")";
     }
 }

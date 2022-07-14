@@ -1,24 +1,32 @@
 import java.awt.*;
+import java.util.ArrayList;
 
-abstract class ActiveEntity extends Entity{
+abstract class ActiveEntity extends Entity
+{
 
-    protected int movement, attacks;
-    public ActiveEntity(int h, int m, int x, int y, int a)
+    protected int damage;
+    protected ArrayList<Land> availableMoves;
+    public ActiveEntity(int h, int m, int x, int y)
     {
-        super(h, x, y);
-        attacks = a;
-        movement = m;
+        super(h, m, x, y);
+        damage = 0;
+        availableMoves = new ArrayList<>();
     }
-    abstract void move(ID id);
-    abstract int attack(ID id);
-    abstract void tick(int key);
-    public int getMovement()
+    public int getDamage()
     {
-        return movement;
+        return damage;
     }
-    public int getAttacks()
-    {
-        return attacks;
+    public ArrayList<Land> getAvailableMoves() {
+        return availableMoves;
     }
-    abstract void endTurn();
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+    public void setAvailableMoves(ArrayList<Land> availableMoves) {
+        this.availableMoves = availableMoves;
+    }
+    abstract boolean endTurn();
+
+
+
 }

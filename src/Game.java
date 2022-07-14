@@ -3,37 +3,43 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.util.Random;
 
-public class Game extends Canvas implements Runnable {
-
-    private Thread mainThread;
-    public final int x = 25, y = 25;
+public class Game extends Canvas implements Runnable
+{
+    public final int X = 25, Y = 25; //number of squares
     public int squareSize = 40;
-    public final int WIDTH = x*squareSize, HEIGHT = y*squareSize+22;
-    private boolean running = false;
+    public final int WIDTH = X*squareSize, HEIGHT = Y*squareSize+22;// give buffer for top bar
     private Handler handler;
-    private static ID gameState;
-    private listener keyBoard;
+    private Mouselistener mouse;
+    private boolean running = false;
+    private Thread mainThread;
 
     public Game()
     {
-        gameState = ID.human;
-        handler = new Handler(keyBoard);
+
+        mouse = new Mouselistener();
+        handler = new Handler(mouse);
         Random rand = new Random();
-        keyBoard = new listener(gameState,handler);
 
         System.setProperty("sun.awt.noerasebackground", "true");
-        for(int i = 0; i < x;i++)
+        for(int i = 0; i < Y;i++)
         {
-            for(int j = 0; j < y;j++)
+            for(int j = 0; j < X;j++)
             {
-                handler.addLand(new Land(i,j));
+                handler.addLand(new Land(j,i,rand.nextInt(1,4)));//add land grid
             }
         }
         Human human = new Human(12,24);
-        handler.addObject(human);
-        for(int i = 0; i<10; i++)
+        handler.addObject(human);//add human
+        for(int i = 0; i<1; i++)
         {
-            handler.addObject(new Goblin(rand.nextInt(x),rand.nextInt(y)));
+            boolean added = false;
+            int t = 0;
+            do
+            {
+                added = handler.addObject(new Goblin(rand.nextInt(X),rand.nextInt(Y)));//add initial goblins
+            }
+            while (!added);
+
         }
         //new MainPage(WIDTH, HEIGHT, "human vs goblin", this);
         JFrame frame = new JFrame("human vs goblin");
@@ -43,18 +49,18 @@ public class Game extends Canvas implements Runnable {
         frame.setLocationRelativeTo(null);
         frame.add(this);
         frame.setVisible(true);
-        addKeyListener(keyBoard);
+        addMouseListener(mouse);
+        addMouseMotionListener(mouse);
         start();
     }
-
-    public synchronized void start()
+    public synchronized void start()//start game
     {
         System.out.println("start");
         mainThread = new Thread(this);
         mainThread.start();
         running = true;
     }
-    public synchronized void stop()
+    public synchronized void stop()//end game
     {
         try
         {
@@ -69,21 +75,23 @@ public class Game extends Canvas implements Runnable {
         mainThread.start();
     }
     @Override
-    public void run()
+    public void run()//start game loop
     {
         System.out.println("run");
+
         long lastTime = System.nanoTime();
         double amountOfTicks = 60.0;
         double ns = 1000000000 /  amountOfTicks;
         double delta = 0.0;
         long timer = System.currentTimeMillis();
         int frames = 0;
+
         while(running)
         {
             long now = System.nanoTime();
             delta += (now - lastTime) / ns;
             lastTime = now;
-            while(delta >= 1)
+            while(delta >= 1)//catch up on ticks if behind
             {
                 tick();
                 delta--;
@@ -105,19 +113,7 @@ public class Game extends Canvas implements Runnable {
     }
     private void tick()
     {
-        if(handler.tick(gameState) == 1)
-        {
-            if(gameState == ID.human)
-            {
-                gameState = ID.goblin;
-            }
-            else
-            {
-                gameState = ID.human;
-            }
-            keyBoard.setGameState(gameState);
-        }
-        //System.out.println(gameState);
+        handler.tick();
     }
     private void render()
     {
@@ -130,17 +126,14 @@ public class Game extends Canvas implements Runnable {
         Graphics g = bs.getDrawGraphics();
 
         g.setColor(Color.gray);
-        g.fillRect(0, 0, this.getWidth(), this.getHeight());
-        g.setColor(Color.RED);
-        handler.render(g,(this.getWidth()/(double)(x)));
-        //System.out.println((this.getWidth()/(double)(x)) + " " + (this.getHeight()/(double)(y)));
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());//make background
+        handler.render(g,this.getWidth()/(double)(X));
         g.setColor(Color.black);
-        for(int i = 0; i<=x;i++)
+        for(int i = 0; i<=X;i++)//draw lines to better show tiles
         {
-            g.drawLine((int)(i*(this.getWidth()/(double)(x))), 0, (int)(i*(this.getWidth()/(double)(x))), this.getHeight());
-            g.drawLine(0, (int)(i*(this.getHeight()/(double)(x))), this.getWidth(), (int)(i*(this.getHeight()/(double)(x))));
+            g.drawLine((int)(i*(this.getWidth()/(double)(X))), 0, (int)(i*(this.getWidth()/(double)(X))), this.getHeight());
+            g.drawLine(0, (int)(i*(this.getHeight()/(double)(X))), this.getWidth(), (int)(i*(this.getHeight()/(double)(X))));
         }
-        //System.out.println(this.getSize());
         g.dispose();
         bs.show();
     }
