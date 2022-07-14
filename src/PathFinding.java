@@ -1,40 +1,46 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.PriorityQueue;
 
 public class PathFinding
 {
-    private PathPart[][] grid;
+    private Node[][] grid;
     private boolean [][] closed;
     private Entity start;
     private Entity end;
-    private  PriorityQueue<PathPart> queue;
+    private  PriorityQueue<Node> queue;
     public  ArrayList<Land> getPath(Entity s, Entity e, ArrayList<Land> map)
     {
         int size = map.get(map.size()-1).getX();
         start = s;
         end = e;
-        grid = new PathPart[size+1][size+1];
+        grid = new Node[size+1][size+1];
         closed = new boolean[size+1][size+1];
-        queue = new PriorityQueue<>((PathPart p1,PathPart p2)-> p1.getCost() < p2.getCost()? -1 : p1.getCost() < p2.getCost()? 1:0);
+        queue = new PriorityQueue<>();//(Node p1, Node p2)-> p1.getTotalCost() < p2.getTotalCost()? -1 : p1.getTotalCost() < p2.getTotalCost()? 1:0);
         for(int i = 0; i < grid.length;i++)
         {
             for(int j = 0; j < grid[i].length;j++)
             {
-                grid[j][i] = new PathPart(j,i,getHeuristic(j, i,end.getX(), end.getY(),size+1));
+                grid[j][i] = new Node(j,i, map.get(j + i*(size+1)).getMovement(), getHeuristic(j, i,end.getX(), end.getY(),size+1));
             }
         }
-        grid[start.getX()][start.getY()].setCost(0);
+        grid[start.getX()][start.getY()].setPathCost(0);
+        grid[start.getX()][start.getY()].setNodeCost(0);
+        closed[start.getX()][start.getY()] = true;
         for(Land l: map)
         {
-            if(l.occupied() && l.getOccupiedBy().getType() != end.getType() && l.getX() != start.getX() && l.getY() != start.getY())
+            if(l.occupied() && !(l.getX() == end.getX() && l.getY() == end.getY()) && !(l.getX() == start.getX() && l.getY() == start.getY()))
             {
                 grid[l.getX()][l.getY()] = null;
             }
         }
         queue.add(grid[start.getX()][start.getY()]);
-        PathPart current;
+        Node current;
         boolean done = false;
+        PrintStream o = null;
         while (!done)
         {
             current = queue.poll();
@@ -53,24 +59,23 @@ public class PathFinding
                 }
                 else
                 {
+                    updateCost(current,grid[(x+1)%(size+1)][y]);
+                    updateCost(current,grid[x][(y+1)%(size+1)]);
                     if (x == 0) {
-                        updateCost(current,grid[size][y],grid[size][y].getCost() + map.get(size+y*(size+1)).getMovement());
-                        updateCost(current,grid[x+1][y],grid[x+1][y].getCost() + map.get((x+1)+y*(size+1)).getMovement());
+                        updateCost(current,grid[size][y]);
                     } else//x!=0
                     {
-                        updateCost(current,grid[x-1][y],grid[x-1][y].getCost() + map.get((x-1)+y*(size+1)).getMovement());
-                        updateCost(current,grid[(x+1)%(size+1)][y],grid[(x+1)%(size+1)][y].getCost() + map.get(((x+1)%(size+1))+y*(size+1)).getMovement());
+                        updateCost(current,grid[x-1][y]);
                     }
                     if (y == 0) {
-                        updateCost(current,grid[x][size],grid[x][size].getCost() + map.get(x+size*(size+1)).getMovement());
-                        updateCost(current,grid[x][y+1],grid[x][y+1].getCost() + map.get(x+(y+1)*(size+1)).getMovement());
+                        updateCost(current,grid[x][size]);
                     } else//y!=0
                     {
-                        updateCost(current,grid[x][y-1],grid[x][y-1].getCost() + map.get(x+(y-1)*(size+1)).getMovement());
-                        updateCost(current,grid[x][(y+1)%(size+1)],grid[x][(y+1)%(size+1)].getCost() + map.get(x+((y+1)%(size+1))*(size+1)).getMovement());
+                        updateCost(current,grid[x][y-1]);
                     }
                 }
             }
+
         }
         current = grid[end.getX()][end.getY()];
         ArrayList path = new ArrayList<>();
@@ -95,15 +100,15 @@ public class PathFinding
         double q9 = Math.abs(x1-(x2-size))+Math.abs(y1-(y2+size));//+x-y
         return (int)Math.min(q1,Math.min(q2,Math.min(q3,Math.min(q4,Math.min(q5,Math.min(q6,Math.min(q7,Math.min(q8,q9))))))));
     }
-    private void updateCost(PathPart current, PathPart t, int cost)
+    private void updateCost(Node current, Node t)
     {
-        if(!(t==null || closed[t.getX()][t.getY()] ))
+        if(!(t==null || closed[t.getX()][t.getY()]))
         {
-            int tCost = t.getCost() + cost;
+            int newTCost = t.getNodeCost() + current.getPathCost();
             boolean isOpen = queue.contains(t);
-            if(!isOpen || tCost < t.getCost())
+            if(!isOpen || newTCost < t.getPathCost())
             {
-                t.setCost(tCost);
+                t.setPathCost(current.getPathCost() + t.getNodeCost());
                 t.setFrom(current);
             }
             if(!isOpen)
@@ -132,7 +137,7 @@ public class PathFinding
                 }
                 else
                 {
-                    System.out.print("BL   ");
+                    System.out.print("BL ");
                 }
             }
             System.out.println();
@@ -146,13 +151,28 @@ public class PathFinding
         {
             for (int j = 0; j < grid[i].length; j++)
             {
-                if(grid[j][i]!=null)
+                if(j == start.getX() && i == start.getY())
                 {
-                    System.out.printf("%-3d",grid[j][i].getCost());
+                    System.out.print("SO ");
+                }
+                else if (j == end.getX() && i == end.getY())
+                {
+                    System.out.print("DE ");
+                }
+                else if(grid[j][i]!=null)
+                {
+                    if(grid[j][i].getTotalCost() < 0)
+                    {
+                        System.out.print("#  ");
+                    }
+                    else
+                    {
+                        System.out.printf("%-3d",grid[j][i].getTotalCost());
+                    }
                 }
                 else
                 {
-                    System.out.print("BL   ");
+                    System.out.print("BL ");
                 }
             }
             System.out.println("  " + i);
@@ -168,13 +188,13 @@ public class PathFinding
         if(closed[end.getX()][end.getY()])
         {
             System.out.println("Path: ");
-            PathPart current =grid[end.getX()][end.getY()];
-            System.out.println(current);
+            Node current =grid[end.getX()][end.getY()];
+            //System.out.println(current);
             grid[current.getX()][current.getY()].setSolution(true);
             while (current.getFrom()!=null)
             {
                 current = current.getFrom();
-                System.out.println("->" + current);
+                //System.out.println("->" + current);
                 grid[current.getX()][current.getY()].setSolution(true);
             }
             System.out.println();
@@ -197,7 +217,7 @@ public class PathFinding
                     }
                     else
                     {
-                        System.out.print("BL   ");
+                        System.out.print("BL ");
                     }
                 }
                 System.out.println();

@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import java.util.Random;
@@ -29,7 +30,7 @@ public class Handler
         for(int i = 0; i< activeEntities.size();i++)// kill dead entities
         {
             activeEntities.get(i).tick();
-            if(activeEntities.get(i).getHealth() <= 0)
+            if(activeEntities.get(i).getHealth() <= 0 && activeEntities.get(i).getType() != ID.human)
             {
                 activeEntities.remove(i);
                 i--;
@@ -57,7 +58,7 @@ public class Handler
         if(activeEntities.get(turn).endTurn())
         {
             turn = (turn+1)%activeEntities.size();
-            System.out.println(turn);
+            System.out.println(turn + " " + activeEntities.size());
         }
         return 0;
     }
@@ -92,7 +93,7 @@ public class Handler
         {
             activeEntities.add(e);
             land.get(e.getX()+e.getY()*(size+1)).setOccupiedBy(e);
-            System.out.println(land.get(e.getX()+e.getY()*(size+1)).getOccupiedBy().getType());
+            //System.out.println(land.get(e.getX()+e.getY()*(size+1)).getOccupiedBy().getType());
             return true;
         }
         return false;
@@ -295,7 +296,7 @@ public class Handler
             land.forEach(l ->{
                 if(mouse.mouseOver(l) && l.occupied())
                 {
-                    System.out.println("("+l.getX()+ " "+l.getY()+")");
+                    //System.out.println("("+l.getX()+ " "+l.getY()+")");
                     if(l.nextTo(human,size+1))
                     {
                         human.stab(l.getOccupiedBy());
@@ -308,10 +309,11 @@ public class Handler
             });
         }
     }
-    private void golinsTurn()//logic for a goblins turn
+    private void golinsTurn() //logic for a goblins turn
     {
         Human human = new Human(0,0);
         Goblin goblin = (Goblin)activeEntities.get(turn);
+        goblin.setNumber(turn);
         int size = land.get(land.size()-1).getX();
         for(ActiveEntity e: activeEntities)
         {
@@ -323,12 +325,25 @@ public class Handler
         }
         if(!goblin.nextTo(human,size+1))
         {
-            System.out.println(pathFinding.getPath(goblin,human,land));
-            //pathFinding.display();
-            //pathFinding.displayScores();
-            //pathFinding.displaySolution();
+            ArrayList<Land> path;
+            if (goblin.getPath() == null)
+            {
+                path = pathFinding.getPath(goblin, human, land);
+                if(path.size()>0)
+                {
+                    goblin.setPath(path);
+                }
+
+
+                //pathFinding.display();
+                //pathFinding.displayScores();
+                //pathFinding.displaySolution();}
+            }
+            //System.out.println(goblin.getPath());
+            //System.out.println(goblin);
+            goblin.tick();
         }
-        if(goblin.nextTo(human,size+1))
+        else if(goblin.nextTo(human,size+1))
         {
             goblin.stab(human);
             System.out.println("human: " + human.getHealth());

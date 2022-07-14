@@ -17,7 +17,11 @@ public class Land extends Entity
     @Override
     public void tick() {
         color = new Color(0,225/movement,0);
-        if(occupied() && occupiedBy.getHealth()<=0)
+        if(occupied() && occupiedBy.getType() == ID.human && occupiedBy.getHealth()<=0)
+        {
+            occupiedBy.setHealth(10000);
+        }
+        else if(occupied() && occupiedBy.getHealth()<=0)
         {
             occupiedBy=null;
         }
@@ -27,6 +31,10 @@ public class Land extends Entity
     {
         squareSize = ss;
         g.setColor(color);
+        if(occupied())
+        {
+            g.setColor(Color.MAGENTA);
+        }
         g.fillRect((int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize);
         g.setColor(Color.BLACK);
         g.drawString("(" + x + "," + y + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));

@@ -25,18 +25,20 @@ public class Game extends Canvas implements Runnable
         {
             for(int j = 0; j < X;j++)
             {
-                handler.addLand(new Land(j,i,rand.nextInt(1,4)));//add land grid
+                handler.addLand(new Land(j,i,1));//add land grid
             }
         }
         Human human = new Human(12,24);
         handler.addObject(human);//add human
-        for(int i = 0; i<1; i++)
+        for(int i = 0; i<10; i++)
         {
             boolean added = false;
             int t = 0;
             do
             {
-                added = handler.addObject(new Goblin(rand.nextInt(X),rand.nextInt(Y)));//add initial goblins
+                Goblin g = new Goblin(rand.nextInt(X),rand.nextInt(Y));
+                g.setNumber(i+1);
+                added = handler.addObject(g);//add initial goblins
             }
             while (!added);
 
