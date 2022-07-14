@@ -27,14 +27,10 @@ public class Handler
     }
     public int tick()
     {
-        for(int i = 0; i< activeEntities.size();i++)// kill dead entities
+        activeEntities.get(turn).tick();
+        if(activeEntities.get(turn).getHealth() <= 0 && activeEntities.get(turn).getType() != ID.human)
         {
-            activeEntities.get(i).tick();
-            if(activeEntities.get(i).getHealth() <= 0 && activeEntities.get(i).getType() != ID.human)
-            {
-                activeEntities.remove(i);
-                i--;
-            }
+            activeEntities.remove(turn);
         }
         land.forEach(l ->{
 
@@ -53,7 +49,10 @@ public class Handler
         }
         if(activeEntities.get(turn).getType() == ID.goblin)
         {
-            golinsTurn();
+            if(!((Goblin)activeEntities.get(turn)).getMoving())
+            {
+                golinsTurn();
+            }
         }
         if(activeEntities.get(turn).endTurn())
         {
@@ -336,12 +335,11 @@ public class Handler
 
 
                 //pathFinding.display();
-                //pathFinding.displayScores();
-                //pathFinding.displaySolution();}
+                pathFinding.displayScores();
+                pathFinding.displaySolution();
             }
             //System.out.println(goblin.getPath());
             //System.out.println(goblin);
-            goblin.tick();
         }
         else if(goblin.nextTo(human,size+1))
         {

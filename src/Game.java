@@ -25,7 +25,7 @@ public class Game extends Canvas implements Runnable
         {
             for(int j = 0; j < X;j++)
             {
-                handler.addLand(new Land(j,i,1));//add land grid
+                handler.addLand(new Land(j,i,rand.nextInt(1,3)));//add land grid
             }
         }
         Human human = new Human(12,24);

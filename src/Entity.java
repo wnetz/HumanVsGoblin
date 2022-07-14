@@ -3,7 +3,7 @@ import java.awt.*;
 abstract class Entity
 {
     protected int health, movement;
-    protected int x, y;
+    protected double x, y;
     protected double squareSize;
     protected ID type;
     public Entity(int h, int m, int x, int y)
@@ -42,10 +42,10 @@ abstract class Entity
         return movement;
     }
     public int getX() {
-        return x;
+        return (int)x;
     }
     public int getY() {
-        return y;
+        return (int)y;
     }
     public double getSquareSize() {
         return squareSize;

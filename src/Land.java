@@ -30,14 +30,14 @@ public class Land extends Entity
     public void render(Graphics g, double ss)
     {
         squareSize = ss;
-        g.setColor(color);
-        if(occupied())
+        g.setColor(new Color(0,255/movement,0));
+        /*if(occupied())
         {
             g.setColor(Color.MAGENTA);
-        }
+        }*/
         g.fillRect((int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize);
         g.setColor(Color.BLACK);
-        g.drawString("(" + x + "," + y + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
+        g.drawString("(" + (int)x + "," + (int)y + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
         if(occupied())//render children if they exist
         {
             occupiedBy.render(g,ss);

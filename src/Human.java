@@ -33,7 +33,7 @@ public class Human extends ActiveEntity
     public void render(Graphics g, double ss)
     {
         squareSize = ss;
-        availableMoves.forEach(l->l.render(g,ss));//draw all spaces human can move
+        //availableMoves.forEach(l->l.render(g,ss));//draw all spaces human can move
         g.drawImage(p, (int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize, null);
     }
     public void stab(Entity e)
