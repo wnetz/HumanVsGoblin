@@ -16,7 +16,7 @@ public class Land extends Entity
     }
     @Override
     public void tick() {
-        color = new Color(0,225/movement,0);
+        color = new Color(0,225/1,0);
         if(occupied() && occupiedBy.getType() == ID.human && occupiedBy.getHealth()<=0)
         {
             occupiedBy.setHealth(10000);
@@ -30,7 +30,7 @@ public class Land extends Entity
     public void render(Graphics g, double ss)
     {
         squareSize = ss;
-        g.setColor(new Color(0,255/movement,0));
+        g.setColor(color);
         /*if(occupied())
         {
             g.setColor(Color.MAGENTA);
@@ -40,7 +40,7 @@ public class Land extends Entity
         g.drawString("(" + (int)x + "," + (int)y + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
         if(occupied())//render children if they exist
         {
-            occupiedBy.render(g,ss);
+            //occupiedBy.render(g,ss);
         }
     }
     public boolean occupied()//determine if tile has a child

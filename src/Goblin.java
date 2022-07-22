@@ -18,10 +18,34 @@ public class Goblin extends ActiveEntity
         number = 0;
         path = null;
         moving = false;
-        speed = .5;
+        speed = .2;
     }
     @Override
     public void tick() {
+
+    }
+
+    @Override
+    public void render(Graphics g, double ss)
+    {
+        squareSize = ss;
+        g.setColor(Color.yellow);
+        g.fillRect((int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize);
+        g.setColor(Color.BLACK);
+        g.drawString("(" + number + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
+    }
+    public void stab(Entity e)
+    {
+        if(!attacked)
+        {
+            e.removeHealth(damage);
+            attacked = true;
+            movement = 0;
+        }
+    }
+
+    @Override
+    void tick(ArrayList<Land> Land) {
         if(path != null && path.size() > 1 && !moving && movement >= path.get(1).getMovement())
         {
             path.get(0).setOccupiedBy(null);
@@ -67,24 +91,6 @@ public class Goblin extends ActiveEntity
         }
     }
 
-    @Override
-    public void render(Graphics g, double ss)
-    {
-        squareSize = ss;
-        g.setColor(Color.yellow);
-        g.fillRect((int) (x * squareSize), (int) (y * squareSize), (int) squareSize, (int) squareSize);
-        g.setColor(Color.BLACK);
-        g.drawString("(" + number + ")",(int) (x * squareSize), (int) (y * squareSize+squareSize/2));
-    }
-    public void stab(Entity e)
-    {
-        if(!attacked)
-        {
-            e.removeHealth(damage);
-            attacked = true;
-            movement = 0;
-        }
-    }
     @Override
     public boolean endTurn()
     {

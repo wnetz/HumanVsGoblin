@@ -12,6 +12,7 @@ abstract class ActiveEntity extends Entity
         damage = 0;
         availableMoves = new ArrayList<>();
     }
+    abstract void tick(ArrayList<Land> Land);
     public int getDamage()
     {
         return damage;

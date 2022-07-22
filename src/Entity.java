@@ -54,6 +54,62 @@ abstract class Entity
     {
         return type;
     }
+    public ID getDirection(Entity e)
+    {
+        System.out.println("("+x+","+y+")("+e.getX()+","+e.getY()+")");
+        ID direction = ID.human;
+        if(x == e.getX())
+        {
+            if(y > e.getY())
+            {
+                if (y-e.getY() > 25 / 2.0)
+                {
+                    direction = ID.right;//need to loop
+                }
+                else
+                {
+                    direction = ID.left;
+                }
+            }
+            else
+            {
+                if (e.getY()-y > 25 / 2.0)
+                {
+                    direction = ID.left;//need to loop
+                }
+                else
+                {
+                    direction = ID.right;
+                }
+            }
+        }
+        else
+        {
+            if(x > e.getX())
+            {
+                if (x-e.getX() > 25 / 2.0)
+                {
+                    direction = ID.down;//need to loop
+                }
+                else
+                {
+                    direction = ID.up;
+                }
+            }
+            else
+            {
+                if (e.getX()-x > 25 / 2.0)
+                {
+                    direction = ID.up;//need to loop
+                }
+                else
+                {
+                    direction = ID.down;
+                }
+            }
+        }
+        return direction;
+    }
     public boolean setHealth(int h)
     {
         health = h;

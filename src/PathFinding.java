@@ -1,3 +1,5 @@
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -7,30 +9,40 @@ import java.util.PriorityQueue;
 
 public class PathFinding
 {
-    private Node[][] grid;
     private boolean [][] closed;
-    private Entity start;
     private Entity end;
+    private Entity start;
+    private Node[][] grid;
     private  PriorityQueue<Node> queue;
+
+    /***
+     * @param s
+     * @param e
+     * @param map
+     * @return get the shortest path between two entities
+     */
     public  ArrayList<Land> getPath(Entity s, Entity e, ArrayList<Land> map)
     {
         int size = map.get(map.size()-1).getX();
-        start = s;
-        end = e;
-        grid = new Node[size+1][size+1];
         closed = new boolean[size+1][size+1];
-        queue = new PriorityQueue<>();//(Node p1, Node p2)-> p1.getTotalCost() < p2.getTotalCost()? -1 : p1.getTotalCost() < p2.getTotalCost()? 1:0);
-        for(int i = 0; i < grid.length;i++)
+        end = e;
+        start = s;
+        grid = new Node[size+1][size+1];
+        queue = new PriorityQueue<>();
+
+        for(int i = 0; i < grid.length;i++)//fill grid
         {
             for(int j = 0; j < grid[i].length;j++)
             {
                 grid[j][i] = new Node(j,i, map.get(j + i*(size+1)).getMovement(), getHeuristic(j, i,end.getX(), end.getY(),size+1));
             }
         }
+
         grid[start.getX()][start.getY()].setPathCost(0);
         grid[start.getX()][start.getY()].setNodeCost(0);
         closed[start.getX()][start.getY()] = true;
-        for(Land l: map)
+
+        for(Land l: map)//block occupied land that is not start or end
         {
             if(l.occupied() && !(l.getX() == end.getX() && l.getY() == end.getY()) && !(l.getX() == start.getX() && l.getY() == start.getY()))
             {
@@ -40,7 +52,6 @@ public class PathFinding
         queue.add(grid[start.getX()][start.getY()]);
         Node current;
         boolean done = false;
-        PrintStream o = null;
         while (!done)
         {
             current = queue.poll();
@@ -61,24 +72,23 @@ public class PathFinding
                 {
                     updateCost(current,grid[(x+1)%(size+1)][y]);
                     updateCost(current,grid[x][(y+1)%(size+1)]);
-                    if (x == 0) {
+                    if (x == 0)
                         updateCost(current,grid[size][y]);
-                    } else//x!=0
-                    {
+                    else//x!=0
                         updateCost(current,grid[x-1][y]);
-                    }
-                    if (y == 0) {
+
+                    if (y == 0)
                         updateCost(current,grid[x][size]);
-                    } else//y!=0
-                    {
+                    else//y!=0
                         updateCost(current,grid[x][y-1]);
-                    }
                 }
             }
 
         }
+
         current = grid[end.getX()][end.getY()];
         ArrayList path = new ArrayList<>();
+        path.add(map.get(current.getX() + current.getY()*(size+1)));
         while (current.getFrom() != null)
         {
             current=current.getFrom();
@@ -228,6 +238,84 @@ public class PathFinding
         {
             System.out.println("no path found");
         }
+    }
+
+    /***
+     * @param ae
+     * @param size
+     * @param land
+     * @return get all spaces an active entity can move to
+     */
+    public @NotNull ArrayList<Land> getMovement(@NotNull ActiveEntity ae, int size, @NotNull ArrayList<Land> land)//get the squares any ActiveEntity can move to
+    {
+        int x = ae.getX();
+        int y = ae.getY();
+        int movement = ae.getMovement();
+        ArrayList<Land> moves = new ArrayList<>();
+        moves.add(new Land(land.get(x+y*(size+1)).getX(),land.get(x+y*(size+1)).getY(),movement));
+
+        if(movement != 0)//if active entity still has movement check all directors
+        {
+            moves.addAll(getMovement((x + 1)%(size+1), y, movement, size, land)); //x+1
+            moves.addAll(getMovement(x, (y + 1)%(size+1), movement, size, land)); //y+1
+            if (x == 0)
+                moves.addAll(getMovement(size, y, movement, size, land)); //x-1
+            else
+                moves.addAll(getMovement(x - 1, y, movement, size, land)); //x-1
+
+            if (y == 0)
+                moves.addAll(getMovement(x, size, movement, size, land)); //y-1
+            else
+                moves.addAll(getMovement(x, y - 1, movement, size, land)); //y-1
+        }
+
+        ArrayList<Land> remove = new ArrayList<>();
+        // ******************** should change to stream.distinct ********************
+        for(int i = 0; i<moves.size();i++)//remove any duplicates;
+        {
+            moves.get(i).setSquareSize(land.get(0).getSquareSize());
+            for(int j = i+1; j<moves.size();j++)
+            {
+                if(moves.get(i).getX() == moves.get(j).getX() && moves.get(i).getY() == moves.get(j).getY())
+                {
+                    if(moves.get(i).getMovement() > moves.get(j).getMovement())
+                    {
+                        remove.add(moves.get(j));
+                    }
+                    else
+                    {
+                        remove.add(moves.get(i));
+                    }
+                }
+            }
+        }
+        moves.removeAll(remove);
+        return moves;
+    }
+    private @NotNull ArrayList<Land> getMovement(int x, int y, int movement, int size, @NotNull ArrayList<Land> land)//recursive call
+    {
+        ArrayList<Land> moves = new ArrayList<>();
+        if(movement >= land.get(x+y*(size+1)).getMovement() && !land.get(x+y*(size+1)).occupied())// if active entity can move into space
+        {
+            movement -= land.get(x+y*(size+1)).getMovement();//update movement left
+            moves.add(new Land(land.get(x+y*(size+1)).getX(),land.get(x+y*(size+1)).getY(),movement));
+
+            if(movement != 0)//if active entity still has movement check all directors
+            {
+                moves.addAll(getMovement((x + 1)%(size+1), y, movement, size, land)); //x+1
+                moves.addAll(getMovement(x, (y + 1)%(size+1), movement, size, land)); //y+1
+                if (x == 0)
+                    moves.addAll(getMovement(size, y, movement, size, land)); //x-1
+                else
+                    moves.addAll(getMovement(x - 1, y, movement, size, land)); //x-1
+
+                if (y == 0)
+                    moves.addAll(getMovement(x, size, movement, size, land)); //y-1
+                else
+                    moves.addAll(getMovement(x, y - 1, movement, size, land)); //y-1
+            }
+        }
+        return moves;
     }
 
 }
