@@ -41,11 +41,18 @@ public class GamePanel extends JPanel implements Runnable
         }
 
         waveCollapse = new WaveCollapse(handler.getLand(),COLUMNS,ROWS);
+        boolean mapBuilt = waveCollapse.collapse();
+        /*while (!mapBuilt)
+        {
+            mapBuilt = waveCollapse.collaps();
+            waveCollapse.reset();
+        }*/
+
 
         Human human = new Human((COLUMNS/2),(ROWS-1), mouse, COLUMNS, ROWS, TILE_SIZE);
         handler.addObject(human);//add human
 
-        for(int i = 0; i<10; i++)//add initial goblins
+        for(int i = 0; i<1; i++)//add initial goblins
         {
             boolean added = false;
             int t = 0;
@@ -113,8 +120,6 @@ public class GamePanel extends JPanel implements Runnable
     {
         super.paintComponent(g);
         handler.render(g,TILE_SIZE);
-        waveCollapse.collaps(g,TILE_SIZE);
-        waveCollapse.reset();
         /*g.setColor(Color.black);
         for(int i = 0; i<=X;i++)//draw lines to better show tiles
         {
