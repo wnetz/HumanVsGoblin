@@ -1,4 +1,4 @@
-package Pathing;
+package Logic.Pathing;
 
 import GameObject.ActiveEntity;
 import GameObject.Entity;
@@ -109,6 +109,25 @@ public class PathFinding
         double q8 = Math.abs(x1-(x2+columns))+Math.abs(y1-(y2-rows));//-x+y
         double q9 = Math.abs(x1-(x2-columns))+Math.abs(y1-(y2+rows));//+x-y
         return (int)Math.min(q1,Math.min(q2,Math.min(q3,Math.min(q4,Math.min(q5,Math.min(q6,Math.min(q7,Math.min(q8,q9))))))));
+    }
+    public static double getdistance(int x1, int y1, int x2, int y2, int columns, int rows)
+    {
+
+        double pow = Math.pow(x1 - (x2 + columns), 2);
+        double pow1 = Math.pow(y1 - (y2 + rows), 2);
+        double pow2 = Math.pow(x1 - (x2 - columns), 2);
+        double pow3 = Math.pow(y1 - (y2 - rows), 2);
+        //account for the looping of the map
+        double q1 = Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2));//00
+        double q2 = Math.sqrt(pow +Math.pow(y1-y2,2));//-x
+        double q3 = Math.sqrt(Math.pow(x1-x2,2)+ pow1);//-y
+        double q4 = Math.sqrt(pow + pow1);//-x-y
+        double q5 = Math.sqrt(pow2 +Math.pow(y1-y2,2));//+x
+        double q6 = Math.sqrt(Math.pow(x1-x2,2)+ pow3);//+y
+        double q7 = Math.sqrt(pow2 + pow3);//+x+y
+        double q8 = Math.sqrt(pow + pow3);//-x+y
+        double q9 = Math.sqrt(pow2 + pow1);//+x-y
+        return Math.min(q1,Math.min(q2,Math.min(q3,Math.min(q4,Math.min(q5,Math.min(q6,Math.min(q7,Math.min(q8,q9))))))));
     }
     private void updateCost(Node current, Node t)
     {

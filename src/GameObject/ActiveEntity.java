@@ -1,6 +1,6 @@
 package GameObject;
 
-import Pathing.Node;
+import Logic.Pathing.Node;
 
 import java.util.ArrayList;
 

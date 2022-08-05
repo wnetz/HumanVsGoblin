@@ -1,15 +1,14 @@
 package Logic;
 
 import GameObject.*;
-import Pathing.Node;
-import Pathing.PathFinding;
+import Logic.Pathing.Node;
+import Logic.Pathing.PathFinding;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**handles updating and drawing of all objects*/
 public class Handler

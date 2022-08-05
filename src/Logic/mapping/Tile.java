@@ -1,3 +1,5 @@
+package Logic.mapping;
+
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -6,12 +8,14 @@ public class Tile
     private BufferedImage image;
     private ArrayList<String> edges;
     private int index;
+    private TileType type;
 
-    public Tile(BufferedImage i, ArrayList<String> e, int in)
+    public Tile(BufferedImage i, ArrayList<String> e, int in, TileType t)
     {
         image = i;
         edges = e;
         index = in;
+        type = t;
     }
 
     public BufferedImage getImage()
@@ -56,5 +60,13 @@ public class Tile
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public TileType getType() {
+        return type;
+    }
+
+    public void setType(TileType type) {
+        this.type = type;
     }
 }

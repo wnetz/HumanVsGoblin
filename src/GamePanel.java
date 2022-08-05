@@ -3,9 +3,12 @@ import GameObject.Human;
 import GameObject.Land;
 import Logic.Handler;
 import Logic.Mouselistener;
+import Logic.mapping.PoissonDisc;
+import Logic.mapping.WaveCollapse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class GamePanel extends JPanel implements Runnable
@@ -19,7 +22,7 @@ public class GamePanel extends JPanel implements Runnable
     private Handler handler;
     private Mouselistener mouse;
     private Thread gameThread;
-    private  WaveCollapse waveCollapse;
+    private WaveCollapse waveCollapse;
     public GamePanel()
     {
         mouse = new Mouselistener();
@@ -40,9 +43,11 @@ public class GamePanel extends JPanel implements Runnable
             }
         }
 
-        waveCollapse = new WaveCollapse(handler.getLand(),COLUMNS,ROWS);
+        ArrayList<Land> points = PoissonDisc.generatePoints(2.75,handler.getLand(),COLUMNS,ROWS,10);
+
+        /*waveCollapse = new WaveCollapse(handler.getLand(),COLUMNS,ROWS);
         boolean mapBuilt = waveCollapse.collapse();
-        /*while (!mapBuilt)
+        while (!mapBuilt)
         {
             mapBuilt = waveCollapse.collaps();
             waveCollapse.reset();

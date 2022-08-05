@@ -6,8 +6,8 @@ import Graphics.Animation;
 import Graphics.Frame;
 import Graphics.SpriteSheet;
 import Logic.Mouselistener;
-import Pathing.Node;
-import Pathing.PathFinding;
+import Logic.Pathing.Node;
+import Logic.Pathing.PathFinding;
 
 public class Human extends ActiveEntity
 {

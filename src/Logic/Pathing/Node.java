@@ -1,4 +1,4 @@
-package Pathing;
+package Logic.Pathing;
 
 import GameObject.Entity;
 
