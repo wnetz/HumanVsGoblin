@@ -3,13 +3,17 @@ import GameObject.Human;
 import GameObject.Land;
 import Logic.Handler;
 import Logic.Mouselistener;
+import Logic.mapping.DelaunayTriangulations;
+import Logic.mapping.Point;
 import Logic.mapping.PoissonDisc;
 import Logic.mapping.WaveCollapse;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class GamePanel extends JPanel implements Runnable
 {
@@ -23,6 +27,7 @@ public class GamePanel extends JPanel implements Runnable
     private Mouselistener mouse;
     private Thread gameThread;
     private WaveCollapse waveCollapse;
+    private ArrayList<Polygon> triangles = null;
     public GamePanel()
     {
         mouse = new Mouselistener();
@@ -43,7 +48,16 @@ public class GamePanel extends JPanel implements Runnable
             }
         }
 
-        ArrayList<Land> points = PoissonDisc.generatePoints(2.75,handler.getLand(),COLUMNS,ROWS,10);
+        ArrayList<Point> points = new ArrayList<>(PoissonDisc.generatePoints(2.75,handler.getLand(),COLUMNS,ROWS,10).stream()
+                .map(l-> new Point(l.getX()*TILE_SIZE,l.getY()*TILE_SIZE,l)).collect(Collectors.toList()));
+        triangles = new ArrayList<>(DelaunayTriangulations.triangulate(points,SCREEN_WIDTH,SCREEN_HEIGHT).stream()
+                .map(triangle ->
+                {
+                    int[] x = java.util.List.of(triangle.getPoints()).stream().mapToInt(a-> a.getX()).toArray();
+                    int[] y = List.of(triangle.getPoints()).stream().mapToInt(a-> a.getY()).toArray();
+                    int size = triangle.getPoints().length;
+                    return new Polygon(x,y,size);
+                }).collect(Collectors.toList()));
 
         /*waveCollapse = new WaveCollapse(handler.getLand(),COLUMNS,ROWS);
         boolean mapBuilt = waveCollapse.collapse();
@@ -125,6 +139,11 @@ public class GamePanel extends JPanel implements Runnable
     {
         super.paintComponent(g);
         handler.render(g,TILE_SIZE);
+        for(Polygon triangle: triangles)
+        {
+            g.setColor(Color.blue);
+            g.drawPolygon(triangle);
+        }
         /*g.setColor(Color.black);
         for(int i = 0; i<=X;i++)//draw lines to better show tiles
         {

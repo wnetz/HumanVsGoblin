@@ -46,8 +46,8 @@ public class PoissonDisc
                 double ran = rand.nextDouble(radius,2*radius);
                 x = (int)(x + Math.sin(angle) * ran);
                 y = (int)(y + Math.cos(angle) * ran);
-                x = x >= columns ? x%columns : x < 0 ? columns+x : x;
-                y = y >= rows ? y%rows : y < 0 ? rows+y : y;
+                x = Math.max(0,Math.min(x,c-1));
+                y = Math.max(0,Math.min(y,r-1));;
                 Land candidate = land.get(x + y * columns);
                 if(isValid(candidate))
                 {

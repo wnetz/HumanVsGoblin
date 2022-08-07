@@ -112,7 +112,6 @@ public class PathFinding
     }
     public static double getdistance(int x1, int y1, int x2, int y2, int columns, int rows)
     {
-
         double pow = Math.pow(x1 - (x2 + columns), 2);
         double pow1 = Math.pow(y1 - (y2 + rows), 2);
         double pow2 = Math.pow(x1 - (x2 - columns), 2);
