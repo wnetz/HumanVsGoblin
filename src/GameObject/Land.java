@@ -25,7 +25,7 @@ public class Land extends Entity
         spriteSheet = new SpriteSheet();
         spriteSheet.loadSprite("land");
         Random rand = new Random();
-        image = null;
+        image = spriteSheet.getSprite(rand.nextInt(8),0);
     }
     @Override
     public void tick() {

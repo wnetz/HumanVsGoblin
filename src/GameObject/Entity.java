@@ -133,4 +133,13 @@ public abstract class Entity
         this.squareSize = squareSize;
     }
 
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(obj instanceof  Entity)
+        {
+            return ((Entity) obj).x == x && ((Entity) obj).y == y;
+        }
+        return super.equals(obj);
+    }
 }

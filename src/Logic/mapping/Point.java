@@ -2,15 +2,19 @@ package Logic.mapping;
 
 import GameObject.Land;
 
+import java.util.ArrayList;
+
 public class Point
 {
     private int x,y;
+    private ArrayList<Point> adjacent;
     private Land land;
     public Point(int x1, int y1, Land l)
     {
         x = x1;
         y = y1;
         land = l;
+        adjacent = new ArrayList<>();
     }
     public Point(int x1, int y1)
     {
@@ -42,6 +46,30 @@ public class Point
     public void setY(int y) {
         this.y = y;
     }
+    public void addAdjacent(Point p)
+    {
+        if(!adjacent.contains(p))
+        {
+            adjacent.add(p);
+        }
+    }
+    public void removeAdjacent(Point p)
+    {
+        adjacent.remove(p);
+    }
+
+    public Land getLand() {
+        return land;
+    }
+
+    public void setLand(Land land) {
+        this.land = land;
+    }
+
+    public ArrayList<Point> getAdjacent() {
+        return adjacent;
+    }
+
     public int det(Point point)
     {
         return x*point.y - y* point.x;

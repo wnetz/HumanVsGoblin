@@ -1,19 +1,21 @@
+import GameObject.Entity;
 import GameObject.Goblin;
 import GameObject.Human;
 import GameObject.Land;
 import Logic.Handler;
 import Logic.Mouselistener;
-import Logic.mapping.DelaunayTriangulations;
+import Logic.mapping.*;
 import Logic.mapping.Point;
-import Logic.mapping.PoissonDisc;
-import Logic.mapping.WaveCollapse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import Graphics.SpriteSheet;
 
 public class GamePanel extends JPanel implements Runnable
 {
@@ -28,6 +30,7 @@ public class GamePanel extends JPanel implements Runnable
     private Thread gameThread;
     private WaveCollapse waveCollapse;
     private ArrayList<Polygon> triangles = null;
+    private ArrayList<Point> points;
     public GamePanel()
     {
         mouse = new Mouselistener();
@@ -48,9 +51,10 @@ public class GamePanel extends JPanel implements Runnable
             }
         }
 
-        ArrayList<Point> points = new ArrayList<>(PoissonDisc.generatePoints(2.75,handler.getLand(),COLUMNS,ROWS,10).stream()
+        points = new ArrayList<>(PoissonDisc.generatePoints(rand.nextDouble(2.5,3.5),handler.getLand(),COLUMNS,ROWS,100).stream()
                 .map(l-> new Point(l.getX()*TILE_SIZE,l.getY()*TILE_SIZE,l)).collect(Collectors.toList()));
-        triangles = new ArrayList<>(DelaunayTriangulations.triangulate(points,SCREEN_WIDTH,SCREEN_HEIGHT).stream()
+        ArrayList<Triangle> tri = DelaunayTriangulations.triangulate(points,SCREEN_WIDTH,SCREEN_HEIGHT);
+        triangles = new ArrayList<>(tri.stream()
                 .map(triangle ->
                 {
                     int[] x = java.util.List.of(triangle.getPoints()).stream().mapToInt(a-> a.getX()).toArray();
@@ -58,14 +62,37 @@ public class GamePanel extends JPanel implements Runnable
                     int size = triangle.getPoints().length;
                     return new Polygon(x,y,size);
                 }).collect(Collectors.toList()));
-
-        /*waveCollapse = new WaveCollapse(handler.getLand(),COLUMNS,ROWS);
-        boolean mapBuilt = waveCollapse.collapse();
-        while (!mapBuilt)
+        points = new ArrayList<>();
+        for(Triangle triangle: tri)
         {
-            mapBuilt = waveCollapse.collaps();
-            waveCollapse.reset();
-        }*/
+            Point[] trianglePoints = triangle.getPoints();
+            for(int i = 0; i<trianglePoints.length;i++)
+            {
+                if(!points.contains(trianglePoints[i]))
+                {
+                    points.add(trianglePoints[i]);
+                }
+                points.get(points.indexOf(trianglePoints[i])).addAdjacent(trianglePoints[(i+1)%3]);
+                points.get(points.indexOf(trianglePoints[i])).addAdjacent(trianglePoints[(i+2)%3]);
+            }
+        }
+        SpriteSheet spriteSheet = new SpriteSheet();
+        spriteSheet.loadSprite("land");
+        for(Point point: points)
+        {
+            for(Point to: point.getAdjacent())
+            {
+                Line2D l1 = new Line2D.Double(point.getX()+TILE_SIZE/2,point.getY()+TILE_SIZE/2,to.getX()+TILE_SIZE/2,to.getY()+TILE_SIZE/2);
+                for (Land land : handler.getLand())
+                {
+                    Rectangle2D tile = new Rectangle2D.Double(land.getX()*TILE_SIZE,land.getY()*TILE_SIZE,TILE_SIZE,TILE_SIZE);
+                    if(l1.intersects(tile))
+                    {
+                        land.setImage(spriteSheet.getSprite(0,6));
+                    }
+                }
+            }
+        }
 
 
         Human human = new Human((COLUMNS/2),(ROWS-1), mouse, COLUMNS, ROWS, TILE_SIZE);
@@ -139,11 +166,11 @@ public class GamePanel extends JPanel implements Runnable
     {
         super.paintComponent(g);
         handler.render(g,TILE_SIZE);
-        for(Polygon triangle: triangles)
+        /*for(Polygon triangle: triangles)
         {
             g.setColor(Color.blue);
             g.drawPolygon(triangle);
-        }
+        }*/
         /*g.setColor(Color.black);
         for(int i = 0; i<=X;i++)//draw lines to better show tiles
         {
